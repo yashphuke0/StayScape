@@ -1,0 +1,139 @@
+body {
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+.navbar {
+  height: 5rem;
+  background-color: #ebebeb;
+  
+  margin-bottom: 1rem;
+}
+
+.fa-compass {
+  color: #fe424d;
+  font-size: 2rem;
+}
+.nav-link {
+  color: #222222 !important;
+}
+
+.f-info-links a {
+  text-decoration: none;
+  color: #222222;
+  margin: 4px;
+}
+
+.f-info-links a:hover {
+  text-decoration: underline;
+}
+
+.f-info-links,
+.f-info-socials,
+.f-info-brand {
+  width: 100%;
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.f-info-socials i {
+  font-size: 1.2rem;
+  margin-right: 1rem;
+}
+.f-info {
+  display: flex;
+  background-color: #ebebeb;
+  height: 8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  text-align: center;
+}
+
+.listing-card {
+  border: none !important;
+  margin-bottom: 2rem;
+}
+
+.card-img-top {
+  border-radius: 1rem !important;
+  width: 100% !important;
+  object-fit: cover !important;
+}
+
+.card-img-top-show {
+  border-radius: 1rem !important;
+
+  width: 80% !important;
+  object-fit: cover !important;
+}
+
+.card-text p {
+  font-weight: 400;
+}
+
+.listing-link {
+  text-decoration: none;
+}
+
+.card-img-overlay {
+  opacity: 0;
+}
+
+.card-img-overlay:hover {
+  opacity: 0.6;
+  background-color: rgba(253, 253, 253, 0.308);
+}
+
+/* Edit Page */
+.add-btn,
+.edit-btn {
+  background-color: #fe424d !important;
+  border: none !important;
+}
+
+/* Show Page */
+.show-img {
+  height: 20rem !important;
+  margin-left: 10% !important;
+}
+
+.btns {
+  display: flex;
+  margin-left: 0;
+}
+
+.show-card {
+  padding-left: 0;
+  padding-right: 0;
+  width: 20rem;
+}
+
+.card-body {
+  padding: 0 !important;
+}
+
+.alert {
+  display: flex;
+  align-items: center; /* Vertically center items */
+}
+
+/* Style for the SVG icon */
+.alert-icon {
+  margin-right: 8px !important; /* Space between the icon and message */
+  width: 50px !important; /* Adjust width as needed */
+  height: 30px !important;
+}
+
+/* review*/
+.form-range {
+  width: 25% !important;
+  height: 0.5rem !important;
+}
