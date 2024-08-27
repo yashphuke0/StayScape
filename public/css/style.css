@@ -15,6 +15,10 @@ body {
   margin-bottom: 1rem;
 }
 
+.container-fluid {
+  background-color: #ebebeb !important;
+}
+
 .fa-compass {
   color: #fe424d;
   font-size: 2rem;
