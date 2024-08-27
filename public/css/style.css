@@ -11,7 +11,7 @@ body {
 .navbar {
   height: 5rem;
   background-color: #ebebeb;
-  
+
   margin-bottom: 1rem;
 }
 
@@ -43,9 +43,19 @@ body {
   justify-content: center;
 }
 
+.f-info-socials a {
+  text-decoration: none;
+  color: #222222;
+}
+
+.f-info-socials a:hover {
+  color: blue;
+}
+
 .f-info-socials i {
   font-size: 1.2rem;
   margin-right: 1rem;
+  text-decoration: none;
 }
 .f-info {
   display: flex;
