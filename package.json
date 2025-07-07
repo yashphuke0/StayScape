@@ -1,36 +1,21 @@
 {
-  "engines":{
-    "node": "20.11.0"
-  },
-
-  "name": "majorproject",
+  "name": "stayscape-mern",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "StayScape - Full Stack Vacation Rental Platform (MERN)",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "echo 'Start both servers:' && echo '1. Server: cd server && npm run dev' && echo '2. Client: cd client && npm run dev'",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "build": "cd client && npm run build"
   },
-  "keywords": [],
+  "keywords": ["mern", "vacation", "rental", "react", "express", "mongodb"],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "bootstrap": "^5.3.3",
-    "cloudinary": "^1.21.0",
-    "connect-flash": "^0.1.1",
-    "connect-mongo": "^5.1.0",
-    "cookie-parser": "^1.4.6",
-    "dotenv": "^16.4.5",
-    "ejs": "^3.1.10",
-    "ejs-mate": "^4.0.0",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
-    "joi": "^17.13.3",
-    "method-override": "^3.0.0",
-    "mongoose": "^8.5.3",
-    "multer": "^1.4.5-lts.1",
-    "multer-storage-cloudinary": "^4.0.0",
-    "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^8.0.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/stayscape.git"
   }
-}
+} 

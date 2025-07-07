@@ -1,32 +1,30 @@
-# StayScape
+# StayScape - MERN Stack
 
-A full-stack vacation rental platform built with Node.js, Express, and MongoDB. StayScape allows users to discover, list, and book unique accommodations worldwide.
+A full-stack vacation rental platform built with the MERN stack (MongoDB, Express.js, React, Node.js). StayScape allows users to discover, list, and book unique accommodations worldwide.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Environment Variables](#environment-variables)
-- [Usage](#usage)
+- [Running the Application](#running-the-application)
 - [API Routes](#api-routes)
-- [Project Structure](#project-structure)
-- [Database Schema](#database-schema)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
 ### Core Features
-- **User Authentication**: Secure signup/login with Passport.js
+- **User Authentication**: JWT-based secure signup/login
 - **Property Listings**: Create, read, update, and delete vacation rental listings
 - **Image Upload**: Integration with Cloudinary for image storage and optimization
 - **Review System**: Rate and review properties with star ratings
 - **Search Functionality**: Find properties by destination
 - **Responsive Design**: Mobile-friendly interface with Bootstrap
 - **Interactive Maps**: Google Maps integration for property locations
-- **Flash Messaging**: User feedback with success/error notifications
+- **Real-time Updates**: React-based SPA for smooth user experience
 
 ### User Roles
 - **Property Owners**: List and manage rental properties
@@ -42,27 +40,56 @@ A full-stack vacation rental platform built with Node.js, Express, and MongoDB. 
 
 ## Technology Stack
 
-### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: Passport.js with Local Strategy
-- **Session Management**: Express-session with MongoDB store
-- **File Upload**: Multer with Cloudinary storage
-- **Validation**: Joi for server-side validation
-
-### Frontend
-- **Template Engine**: EJS with EJS-Mate
+### Frontend (React)
+- **Framework**: React 18 with Vite
+- **Routing**: React Router DOM
+- **State Management**: React Context API
+- **HTTP Client**: Axios with interceptors
 - **CSS Framework**: Bootstrap 5.3.3
 - **Icons**: Font Awesome 6.6.0
 - **Fonts**: Google Fonts (Plus Jakarta Sans)
-- **Maps**: Google Maps JavaScript API
+
+### Backend (Node.js/Express)
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **File Upload**: Multer with Cloudinary storage
+- **Validation**: Joi for server-side validation
+- **Security**: CORS, bcryptjs password hashing
 
 ### Development Tools
+- **Build Tool**: Vite (frontend)
+- **Process Manager**: Nodemon (backend)
 - **Environment Management**: dotenv
-- **HTTP Method Override**: method-override
-- **Flash Messages**: connect-flash
-- **Error Handling**: Custom ExpressError class
+- **Package Manager**: npm
+
+## Project Structure
+
+```
+StayScape-MERN/
+├── client/                 # React frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/     # Reusable React components
+│   │   ├── pages/          # Page components
+│   │   ├── context/        # React Context (Auth)
+│   │   ├── services/       # API service layer
+│   │   ├── assets/         # CSS and static assets
+│   │   └── utils/          # Utility functions
+│   └── package.json
+├── server/                 # Express API backend
+│   ├── controllers/        # Route handlers
+│   ├── models/            # Database schemas
+│   ├── routes/            # Route definitions
+│   ├── middleware/        # Custom middleware
+│   ├── utils/             # Utility functions
+│   └── package.json
+├── public/                 # Legacy static assets
+├── views/                  # Legacy EJS templates
+├── package.json           # Root package.json with scripts
+└── README.md
+```
 
 ## Prerequisites
 
@@ -70,7 +97,7 @@ Before running this application, make sure you have the following installed:
 
 - Node.js (v20.11.0 or higher)
 - MongoDB (local installation or MongoDB Atlas account)
-- npm or yarn package manager
+- npm package manager
 
 ## Installation
 
@@ -80,193 +107,123 @@ Before running this application, make sure you have the following installed:
    cd stayscape
    ```
 
-2. **Install dependencies**
+2. **Install dependencies for both client and server**
    ```bash
+   # Install server dependencies
+   cd server
    npm install
+   
+   # Install client dependencies
+   cd ../client
+   npm install
+   
+   # Or use the root package.json script
+   cd ..
+   npm run install-all
    ```
-
-3. **Set up environment variables**
-   Create a `.env` file in the root directory (see [Environment Variables](#environment-variables))
-
-4. **Initialize the database (optional)**
-   ```bash
-   node init/index.js
-   ```
-
-5. **Start the application**
-   ```bash
-   node app.js
-   ```
-
-6. **Access the application**
-   Open your browser and navigate to `http://localhost:8080`
 
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the `server/` directory with the following variables:
 
 ```env
 # Database
 ATLASDB_URL=your_mongodb_connection_string
 
-# Session Secret
-SECRET=your_session_secret_key
+# JWT Configuration
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRE=7d
 
 # Cloudinary Configuration
 CLOUD_NAME=your_cloudinary_cloud_name
 CLOUD_API_KEY=your_cloudinary_api_key
 CLOUD_API_SECRET=your_cloudinary_api_secret
 
-# Environment
+# Server Configuration
+PORT=5000
 NODE_ENV=development
+CLIENT_URL=http://localhost:3000
 ```
 
 ### Getting API Keys
 
 1. **MongoDB Atlas**: Create a free account at [MongoDB Atlas](https://www.mongodb.com/atlas)
 2. **Cloudinary**: Sign up at [Cloudinary](https://cloudinary.com/) for image storage
-3. **Google Maps**: Get an API key from [Google Cloud Console](https://console.cloud.google.com/)
+3. **JWT Secret**: Generate a secure random string for JWT signing
 
-## Usage
+## Running the Application
 
-### For Property Owners
-1. **Sign up** for a new account or **log in**
-2. Navigate to "Airbnb your home" to create a new listing
-3. Fill in property details, upload images, and set pricing
-4. **Manage your listings** through the edit/delete options (only available to listing owners)
+### Development Mode
 
-### For Travelers
-1. **Browse listings** on the homepage
-2. Use **search and filters** to find desired accommodations
-3. **View detailed property information** including location on map
-4. **Leave reviews and ratings** for properties you've experienced
+1. **Start the backend server** (Terminal 1):
+   ```bash
+   cd server
+   npm run dev
+   ```
+   Backend will run on `http://localhost:5000`
 
-### Admin Features
-- Property ownership validation ensures only owners can modify their listings
-- User authentication required for creating listings and reviews
-- Comprehensive error handling and validation
+2. **Start the frontend server** (Terminal 2):
+   ```bash
+   cd client
+   npm run dev
+   ```
+   Frontend will run on `http://localhost:3000`
+
+3. **Access the application**
+   Open your browser and navigate to `http://localhost:3000`
+
+### Quick Start Scripts
+
+```bash
+# Start backend server
+npm run server
+
+# Start frontend server
+npm run client
+
+# Get development instructions
+npm run dev
+```
 
 ## API Routes
 
 ### Authentication Routes
 ```
-GET  /signup          - Display signup form
-POST /signup          - Register new user
-GET  /login           - Display login form
-POST /login           - Authenticate user
-GET  /logout          - Logout user
+POST /api/users/signup     - Register new user
+POST /api/users/login      - Authenticate user
+POST /api/users/logout     - Logout user
+GET  /api/users/me         - Get current user (protected)
 ```
 
 ### Listing Routes
 ```
-GET    /listings           - Display all listings
-GET    /listings/new       - Show new listing form (auth required)
-POST   /listings           - Create new listing (auth required)
-GET    /listings/:id       - Show specific listing
-GET    /listings/:id/edit  - Show edit form (owner only)
-PUT    /listings/:id       - Update listing (owner only)
-DELETE /listings/:id       - Delete listing (owner only)
+GET    /api/listings           - Get all listings
+GET    /api/listings/:id       - Get specific listing
+POST   /api/listings           - Create new listing (protected)
+PUT    /api/listings/:id       - Update listing (owner only)
+DELETE /api/listings/:id       - Delete listing (owner only)
 ```
 
 ### Review Routes
 ```
-POST   /listings/:id/reviews          - Create new review (auth required)
-DELETE /listings/:id/reviews/:reviewId - Delete review (author only)
+POST   /api/listings/:id/reviews          - Create review (protected)
+DELETE /api/listings/:id/reviews/:reviewId - Delete review (author only)
 ```
 
-## Project Structure
+## Authentication Flow
 
-```
-StayScape/
-├── app.js                 # Main application file
-├── cloudConfig.js         # Cloudinary configuration
-├── middlewares.js         # Custom middleware functions
-├── package.json           # Project dependencies
-├── controllers/           # Route handlers
-│   ├── listing.js
-│   ├── reviews.js
-│   └── user.js
-├── models/               # Database schemas
-│   ├── listing.js
-│   ├── reviews.js
-│   └── user.js
-├── routes/               # Route definitions
-│   ├── listing.js
-│   ├── reviews.js
-│   └── user.js
-├── views/                # EJS templates
-│   ├── includes/         # Partial templates
-│   ├── layouts/          # Layout templates
-│   ├── listings/         # Listing-related views
-│   └── users/           # User-related views
-├── public/               # Static assets
-│   ├── css/
-│   └── js/
-├── utils/                # Utility functions
-│   ├── expressError.js
-│   ├── schema.js
-│   └── wrapAsync.js
-└── init/                 # Database initialization
-    ├── data.js
-    └── index.js
-```
+1. User signs up or logs in
+2. Server returns JWT token
+3. Frontend stores token in localStorage
+4. Token is automatically included in API requests
+5. Server verifies token for protected routes
 
-## Database Schema
+## Development Guidelines
 
-### User Model
-```javascript
-{
-  username: String (required),
-  email: String (required, unique),
-  password: String (hashed),
-  createdAt: Date
-}
-```
-
-### Listing Model
-```javascript
-{
-  title: String (required),
-  description: String,
-  image: {
-    filename: String,
-    url: String
-  },
-  price: Number,
-  location: String,
-  country: String,
-  reviews: [ObjectId] (ref: Review),
-  owner: ObjectId (ref: User)
-}
-```
-
-### Review Model
-```javascript
-{
-  comment: String,
-  rating: Number (1-5),
-  date: Date,
-  createAt: Date,
-  author: ObjectId (ref: User)
-}
-```
-
-## Security Features
-
-- **Input Validation**: Server-side validation using Joi
-- **Authentication**: Passport.js with local strategy
-- **Authorization**: Route-level middleware for protected operations
-- **Session Security**: Secure session configuration with MongoDB store
-- **File Upload Security**: Restricted file types and Cloudinary integration
-- **CSRF Protection**: Form validation and user verification
-
-## Performance Optimizations
-
-- **Image Optimization**: Cloudinary automatic compression and resizing
-- **Database Indexing**: Efficient queries with Mongoose
-- **Session Management**: MongoDB session store for scalability
-- **Client-side Validation**: Immediate user feedback
-- **Responsive Images**: Adaptive image serving
+1. **Frontend Development**: Work in the `client/` directory
+2. **Backend Development**: Work in the `server/` directory
+3. **API Testing**: Backend runs on port 5000, test with tools like Postman
+4. **Frontend Testing**: Frontend runs on port 3000 with hot reload
 
 ## Contributing
 
@@ -276,29 +233,20 @@ StayScape/
 4. Push to the branch (`git push origin feature/new-feature`)
 5. Create a Pull Request
 
-### Development Guidelines
-- Follow MVC architecture patterns
-- Use consistent code formatting
-- Add appropriate error handling
-- Include validation for all user inputs
-- Test all routes and functionality
-
 ## License
 
-This project is licensed under the ISC License. See the LICENSE file for details.
+This project is licensed under the ISC License.
 
-## Support
+## Next Steps
 
-For support and questions:
-- Create an issue in the GitHub repository
-- Contact the development team
+The conversion to MERN stack is complete with basic functionality. You can now:
 
-## Acknowledgments
-
-- Built with Express.js and MongoDB
-- UI/UX inspired by modern rental platforms
-- Uses various open-source libraries and tools
+1. Complete the remaining pages (ListingShow, ListingNew, ListingEdit)
+2. Add the review system to the show page
+3. Implement Google Maps integration
+4. Add search functionality
+5. Deploy to production
 
 ---
 
-**StayScape** - Discover your perfect getaway destination. 
+**StayScape MERN** - Discover your perfect getaway destination with modern web technology. 

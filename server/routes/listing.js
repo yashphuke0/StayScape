@@ -6,39 +6,31 @@ const { storage } = require("../cloudConfig.js");
 const upload = multer({ storage });
 
 const { isLoggedIn, isOwner, validateListing } = require("../middlewares.js");
+const { optionalAuth } = require("../middleware/auth");
 const listingController = require("../controllers/listing.js");
 
+// Get all listings (public) and create new listing (protected)
 router
   .route("/")
-  .get(wrapAsync(listingController.index))
+  .get(optionalAuth, wrapAsync(listingController.index))
   .post(
     isLoggedIn,
-    upload.single("listing[image]"),
+    upload.single("image"),
     validateListing,
     wrapAsync(listingController.createListing)
-  )
+  );
 
-//New Route
-router.get("/new", isLoggedIn, listingController.renderNewForm);
-
+// Get, update, and delete specific listing
 router
   .route("/:id")
-  .get(wrapAsync(listingController.showListing))
+  .get(optionalAuth, wrapAsync(listingController.showListing))
   .put(
     isLoggedIn,
     isOwner,
-    upload.single("listing[image]"),
+    upload.single("image"),
     validateListing,
     wrapAsync(listingController.updateListing)
   )
   .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
-
-//Edit Route
-router.get(
-  "/:id/edit",
-  isLoggedIn,
-  isOwner,
-  wrapAsync(listingController.editListing)
-);
 
 module.exports = router;
