@@ -39,6 +39,11 @@ app.use(express.urlencoded({ extended: true }));
 // Static files for uploaded images (if needed)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Serve React build files in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+}
+
 // API Routes
 app.get("/", (req, res) => {
   res.json({
@@ -57,10 +62,17 @@ app.use("/api/listings", listingRouter);
 app.use("/api/listings/:id/reviews", reviewRouter);
 app.use("/api/users", userRouter);
 
-// 404 handler
-app.all("*", (req, res, next) => {
-  next(new ExpressError(404, "API endpoint not found"));
-});
+// Serve React app for all non-API routes in production
+if (process.env.NODE_ENV === "production") {
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+  });
+} else {
+  // 404 handler for development
+  app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "API endpoint not found"));
+  });
+}
 
 // Error handler
 app.use((err, req, res, next) => {
