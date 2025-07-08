@@ -233,19 +233,6 @@ DELETE /api/listings/:id/reviews/:reviewId - Delete review (author only)
 4. Push to the branch (`git push origin feature/new-feature`)
 5. Create a Pull Request
 
-## License
-
-This project is licensed under the ISC License.
-
-## Next Steps
-
-The conversion to MERN stack is complete with basic functionality. You can now:
-
-1. Complete the remaining pages (ListingShow, ListingNew, ListingEdit)
-2. Add the review system to the show page
-3. Implement Google Maps integration
-4. Add search functionality
-5. Deploy to production
 
 ---
 
