@@ -331,9 +331,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter) - your.email@example.com
+**Your Name** - [@yashphuke](https://www.linkedin.com/in/yash-phuke-606126203) - phukeyash0@gmail.com
 
-**Project Link**: [https://github.com/yourusername/stayscape](https://github.com/yourusername/stayscape)
+**Project Link**: [https://github.com/yashphuke0/stayscape](https://github.com/yashphuke0/stayscape)
 
 **Live Demo**: [https://stayscape.onrender.com](https://stayscape.onrender.com)
 
