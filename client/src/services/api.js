@@ -45,7 +45,10 @@ export const authAPI = {
 
 // Listings APIs
 export const listingsAPI = {
-  getAll: () => api.get('/listings'),
+  getAll: (searchQuery) => {
+    const params = searchQuery ? { search: searchQuery } : {};
+    return api.get('/listings', { params });
+  },
   getById: (id) => api.get(`/listings/${id}`),
   create: (formData) => {
     const config = {

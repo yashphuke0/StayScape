@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { listingsAPI } from '../services/api';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allListings, setAllListings] = useState([]);
+  const searchRef = useRef(null);
+  const suggestionsRef = useRef(null);
+  const mobileSearchRef = useRef(null);
+  const mobileSuggestionsRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
@@ -18,11 +26,82 @@ const Navbar = () => {
     if (searchQuery.trim()) {
       navigate(`/listings?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setShowSuggestions(false);
+      setSuggestions([]);
+      setIsMenuOpen(false); // Close mobile menu if open
     }
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Fetch all listings on component mount
+  useEffect(() => {
+    const fetchAllListings = async () => {
+      try {
+        const response = await listingsAPI.getAll();
+        setAllListings(response.data.data);
+      } catch (error) {
+        console.error('Error fetching listings for suggestions:', error);
+      }
+    };
+    fetchAllListings();
+  }, []);
+
+  // Debounced search suggestions
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim() && searchQuery.length > 1) {
+        const filteredSuggestions = allListings
+          .filter(listing => 
+            listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            listing.location.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+          .slice(0, 5) // Limit to 5 suggestions
+          .map(listing => ({
+            id: listing._id,
+            title: listing.title,
+            location: listing.location
+          }));
+        setSuggestions(filteredSuggestions);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, allListings]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isClickInSearch = 
+        (searchRef.current && searchRef.current.contains(event.target)) ||
+        (suggestionsRef.current && suggestionsRef.current.contains(event.target)) ||
+        (mobileSearchRef.current && mobileSearchRef.current.contains(event.target)) ||
+        (mobileSuggestionsRef.current && mobileSuggestionsRef.current.contains(event.target));
+      
+      if (!isClickInSearch) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion.title);
+    setShowSuggestions(false);
+    setIsMenuOpen(false); // Close mobile menu if open
+    navigate(`/listings?search=${encodeURIComponent(suggestion.title)}`);
+  };
+
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   return (
@@ -63,8 +142,12 @@ const Navbar = () => {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: white !important;
             font-size: 1.2rem;
+          }
+          
+          .brand-icon i {
+            color: white !important;
           }
 
           .search-container {
@@ -102,6 +185,63 @@ const Navbar = () => {
             transform: translateY(-50%);
             color: var(--text-muted);
             font-size: 1.1rem;
+          }
+
+          .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            margin-top: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+          }
+
+          .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+
+          .suggestion-item:hover {
+            background-color: #f8f9fa;
+          }
+
+          .suggestion-item:last-child {
+            border-bottom: none;
+          }
+
+          .suggestion-icon {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            width: 16px;
+            text-align: center;
+          }
+
+          .suggestion-text {
+            flex: 1;
+          }
+
+          .suggestion-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 0.9rem;
+          }
+
+          .suggestion-location {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
           }
 
           .nav-links {
@@ -255,6 +395,25 @@ const Navbar = () => {
             }
           }
 
+          @media (max-width: 768px) {
+            .search-suggestions {
+              border-radius: 0.75rem;
+              margin-top: 0.25rem;
+            }
+            
+            .suggestion-item {
+              padding: 0.5rem 0.75rem;
+            }
+            
+            .suggestion-title {
+              font-size: 0.85rem;
+            }
+            
+            .suggestion-location {
+              font-size: 0.75rem;
+            }
+          }
+
           @media (max-width: 576px) {
             .search-container {
               display: none;
@@ -275,16 +434,41 @@ const Navbar = () => {
             </Link>
 
             {/* Search Bar */}
-            <div className="search-container d-none d-md-block">
+            <div className="search-container d-none d-md-block" ref={searchRef}>
               <form onSubmit={handleSearch} className="search-form">
                 <i className="fas fa-search search-icon"></i>
                 <input
                   type="text"
                   placeholder="Search destinations..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleInputChange}
+                  onFocus={() => {
+                    if (suggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
                   className="search-input"
+                  autoComplete="off"
                 />
+                
+                {/* Search Suggestions */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="search-suggestions" ref={suggestionsRef}>
+                    {suggestions.map((suggestion) => (
+                      <div
+                        key={suggestion.id}
+                        className="suggestion-item"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        <i className="fas fa-map-marker-alt suggestion-icon"></i>
+                        <div className="suggestion-text">
+                          <p className="suggestion-title">{suggestion.title}</p>
+                          <p className="suggestion-location">{suggestion.location}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
 
@@ -382,16 +566,41 @@ const Navbar = () => {
           {/* Mobile Menu */}
           <div className={`mobile-menu ${isMenuOpen ? 'show' : ''}`}>
             {/* Mobile Search */}
-            <div className="d-md-none">
+            <div className="d-md-none" ref={mobileSearchRef}>
               <form onSubmit={handleSearch} className="search-form">
                 <i className="fas fa-search search-icon"></i>
                 <input
                   type="text"
                   placeholder="Search destinations..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleInputChange}
+                  onFocus={() => {
+                    if (suggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
                   className="search-input"
+                  autoComplete="off"
                 />
+                
+                {/* Mobile Search Suggestions */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="search-suggestions" ref={mobileSuggestionsRef}>
+                    {suggestions.map((suggestion) => (
+                      <div
+                        key={suggestion.id}
+                        className="suggestion-item"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        <i className="fas fa-map-marker-alt suggestion-icon"></i>
+                        <div className="suggestion-text">
+                          <p className="suggestion-title">{suggestion.title}</p>
+                          <p className="suggestion-location">{suggestion.location}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
 

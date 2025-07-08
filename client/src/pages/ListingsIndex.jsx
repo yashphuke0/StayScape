@@ -5,8 +5,10 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const ListingsIndex = () => {
   const [listings, setListings] = useState([]);
+  const [allListings, setAllListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showTax, setShowTax] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
 
   useEffect(() => {
@@ -15,8 +17,27 @@ const ListingsIndex = () => {
 
   const fetchListings = async () => {
     try {
+      // Extract search query from URL
+      const urlParams = new URLSearchParams(location.search);
+      const currentSearchQuery = urlParams.get('search');
+      setSearchQuery(currentSearchQuery || '');
+      
+      // Try to get all listings first
       const response = await listingsAPI.getAll();
-      setListings(response.data.data);
+      const allData = response.data.data;
+      setAllListings(allData);
+      
+      // If there's a search query, filter client-side
+      if (currentSearchQuery) {
+        const filteredListings = allData.filter(listing => 
+          listing.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+          listing.location.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+          listing.description?.toLowerCase().includes(currentSearchQuery.toLowerCase())
+        );
+        setListings(filteredListings);
+      } else {
+        setListings(allData);
+      }
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {
@@ -38,15 +59,14 @@ const ListingsIndex = () => {
         {`
           .listings-index-page {
             min-height: 100vh;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: #ffffff;
           }
 
           .filters-container {
-            background: white;
-            border-radius: 0 0 2rem 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
             margin-bottom: 2rem;
-            padding: 1.5rem 0;
+            padding: 1rem 0;
           }
 
           .filters-scroll {
@@ -67,31 +87,30 @@ const ListingsIndex = () => {
             flex-direction: column;
             align-items: center;
             min-width: 80px;
-            padding: 1rem 0.75rem;
-            border-radius: 1rem;
-            transition: all var(--transition-fast);
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            border: 2px solid transparent;
-            background: #f8f9fa;
+            border: 1px solid transparent;
+            background: white;
+            transition: opacity 0.2s ease;
           }
 
           .filter-item:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(254, 66, 77, 0.3);
+            opacity: 0.7;
           }
 
           .filter-item i {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+            color: #6c757d;
           }
 
           .filter-item p {
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 500;
             margin: 0;
             text-align: center;
+            color: #495057;
           }
 
           .tax-toggle-container {
@@ -104,24 +123,22 @@ const ListingsIndex = () => {
 
           .tax-toggle {
             background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 2rem;
-            padding: 1rem 1.5rem;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all var(--transition-fast);
+            gap: 0.5rem;
+            transition: border-color 0.2s ease;
           }
 
           .tax-toggle:hover {
             border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(254, 66, 77, 0.2);
           }
 
           .tax-toggle input:checked + .form-check-label {
             color: var(--primary-color);
-            font-weight: 600;
+            font-weight: 500;
           }
 
           .listings-grid {
@@ -209,6 +226,40 @@ const ListingsIndex = () => {
             font-weight: normal;
           }
 
+          .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+          }
+
+          .search-results-header h5 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+          }
+
+          .clear-search-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+          }
+
+          .clear-search-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+          }
+
           .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -225,21 +276,31 @@ const ListingsIndex = () => {
             }
             
             .filter-item {
-              min-width: 70px;
-              padding: 0.75rem 0.5rem;
+              min-width: 65px;
+              padding: 0.5rem 0.25rem;
             }
             
             .filter-item i {
-              font-size: 1.25rem;
+              font-size: 1rem;
             }
             
             .filter-item p {
-              font-size: 0.75rem;
+              font-size: 0.7rem;
             }
             
             .tax-toggle {
-              padding: 0.75rem 1rem;
-              margin: 1rem;
+              padding: 0.5rem 0.75rem;
+              margin: 0.5rem;
+            }
+
+            .search-results-header {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 0.75rem;
+            }
+
+            .search-results-header h5 {
+              font-size: 1rem;
             }
           }
 
@@ -258,20 +319,8 @@ const ListingsIndex = () => {
           <div className="d-flex align-items-center">
             <div className="filters-scroll flex-grow-1">
               <div className="filter-item">
-                <i className="fas fa-fire"></i>
-                <p>Trending</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-bed"></i>
-                <p>Rooms</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-mountain-city"></i>
-                <p>Iconic cities</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-water-ladder"></i>
-                <p>Pools</p>
+                <i className="fas fa-home"></i>
+                <p>All</p>
               </div>
               <div className="filter-item">
                 <i className="fas fa-hotel"></i>
@@ -286,20 +335,8 @@ const ListingsIndex = () => {
                 <p>Mountains</p>
               </div>
               <div className="filter-item">
-                <i className="fas fa-fort-awesome"></i>
-                <p>Castles</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-tents"></i>
-                <p>Camping</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-sailboat"></i>
-                <p>Boats</p>
-              </div>
-              <div className="filter-item">
-                <i className="fas fa-kitchen-set"></i>
-                <p>Kitchen</p>
+                <i className="fas fa-building"></i>
+                <p>City</p>
               </div>
             </div>
 
@@ -322,13 +359,34 @@ const ListingsIndex = () => {
           </div>
         </div>
 
+        {/* Search Results Header */}
+        {searchQuery && (
+          <div className="container">
+            <div className="search-results-header">
+              <h5>
+                {listings.length} result{listings.length !== 1 ? 's' : ''} for "{searchQuery}"
+              </h5>
+              <Link to="/listings" className="clear-search-btn">
+                <i className="fas fa-times"></i> Clear search
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Listings Grid */}
         <div className="container">
           {listings.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-home fa-3x text-muted mb-3"></i>
-              <h3 className="mb-3">No listings found</h3>
-              <p className="text-muted">Check back later for new listings or try adjusting your filters.</p>
+              <h3 className="mb-3">
+                {searchQuery ? `No results found for "${searchQuery}"` : "No listings found"}
+              </h3>
+              <p className="text-muted">
+                {searchQuery 
+                  ? "Try a different search term or check your spelling." 
+                  : "Check back later for new listings or try adjusting your filters."
+                }
+              </p>
             </div>
           ) : (
             <div className="listings-grid">
