@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { listingsAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -9,40 +9,97 @@ const ListingsIndex = () => {
   const [loading, setLoading] = useState(true);
   const [showTax, setShowTax] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchListings();
   }, [location.search]);
 
+  // Apply filters when selectedFilter changes (but not on initial load)
+  useEffect(() => {
+    if (allListings.length > 0) {
+      applyFilters(allListings, searchQuery, selectedFilter);
+    }
+  }, [selectedFilter]);
+
   const fetchListings = async () => {
     try {
-      // Extract search query from URL
+      // Extract search query and filter from URL
       const urlParams = new URLSearchParams(location.search);
       const currentSearchQuery = urlParams.get('search');
+      const currentFilter = urlParams.get('filter') || 'all';
+      
       setSearchQuery(currentSearchQuery || '');
+      setSelectedFilter(currentFilter);
       
       // Try to get all listings first
       const response = await listingsAPI.getAll();
       const allData = response.data.data;
       setAllListings(allData);
       
-      // If there's a search query, filter client-side
-      if (currentSearchQuery) {
-        const filteredListings = allData.filter(listing => 
-          listing.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
-          listing.location.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
-          listing.description?.toLowerCase().includes(currentSearchQuery.toLowerCase())
-        );
-        setListings(filteredListings);
-      } else {
-        setListings(allData);
-      }
+      // Apply filters and search
+      applyFilters(allData, currentSearchQuery, currentFilter);
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = (data, searchTerm, filter) => {
+    let filteredData = [...data];
+
+    // Apply category filter first
+    if (filter && filter !== 'all') {
+      filteredData = filteredData.filter(listing => {
+        const title = listing.title.toLowerCase();
+        const location = listing.location.toLowerCase();
+        const description = listing.description?.toLowerCase() || '';
+        
+        switch (filter) {
+          case 'hotels':
+            return title.includes('hotel') || title.includes('resort') || description.includes('hotel');
+          case 'beach':
+            return title.includes('beach') || location.includes('beach') || description.includes('beach') || location.includes('coastal');
+          case 'mountains':
+            return title.includes('mountain') || location.includes('mountain') || description.includes('mountain') || title.includes('hill');
+          case 'city':
+            return location.includes('city') || title.includes('apartment') || title.includes('downtown') || title.includes('urban');
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply search filter if exists
+    if (searchTerm) {
+      filteredData = filteredData.filter(listing => 
+        listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setListings(filteredData);
+  };
+
+  const handleFilterChange = (filterType) => {
+    setSelectedFilter(filterType);
+    applyFilters(allListings, searchQuery, filterType);
+    
+    // Update URL to include filter parameter
+    const urlParams = new URLSearchParams(location.search);
+    if (filterType === 'all') {
+      urlParams.delete('filter');
+    } else {
+      urlParams.set('filter', filterType);
+    }
+    
+    const newSearch = urlParams.toString();
+    const newPath = newSearch ? `/listings?${newSearch}` : '/listings';
+    navigate(newPath, { replace: true });
   };
 
   const handleTaxToggle = () => {
@@ -92,11 +149,28 @@ const ListingsIndex = () => {
             cursor: pointer;
             border: 1px solid transparent;
             background: white;
-            transition: opacity 0.2s ease;
+            transition: all 0.2s ease;
           }
 
           .filter-item:hover {
             opacity: 0.7;
+            transform: translateY(-1px);
+          }
+
+          .filter-item.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(254, 66, 77, 0.3);
+          }
+
+          .filter-item.active i {
+            color: white !important;
+          }
+
+          .filter-item.active p {
+            color: white !important;
+            font-weight: 600;
           }
 
           .filter-item i {
@@ -302,6 +376,11 @@ const ListingsIndex = () => {
             .search-results-header h5 {
               font-size: 1rem;
             }
+
+            .filter-item.active {
+              transform: translateY(-1px);
+              box-shadow: 0 2px 8px rgba(254, 66, 77, 0.3);
+            }
           }
 
           @media (max-width: 576px) {
@@ -318,23 +397,38 @@ const ListingsIndex = () => {
         <div className="filters-container">
           <div className="d-flex align-items-center px-3">
             <div className="filters-scroll flex-grow-1">
-              <div className="filter-item">
+              <div 
+                className={`filter-item ${selectedFilter === 'all' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('all')}
+              >
                 <i className="fas fa-home"></i>
                 <p>All</p>
               </div>
-              <div className="filter-item">
+              <div 
+                className={`filter-item ${selectedFilter === 'hotels' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('hotels')}
+              >
                 <i className="fas fa-hotel"></i>
                 <p>Hotels</p>
               </div>
-              <div className="filter-item">
+              <div 
+                className={`filter-item ${selectedFilter === 'beach' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('beach')}
+              >
                 <i className="fas fa-umbrella-beach"></i>
                 <p>Beach</p>
               </div>
-              <div className="filter-item">
+              <div 
+                className={`filter-item ${selectedFilter === 'mountains' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('mountains')}
+              >
                 <i className="fas fa-mountain-sun"></i>
                 <p>Mountains</p>
               </div>
-              <div className="filter-item">
+              <div 
+                className={`filter-item ${selectedFilter === 'city' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('city')}
+              >
                 <i className="fas fa-building"></i>
                 <p>City</p>
               </div>
@@ -360,15 +454,30 @@ const ListingsIndex = () => {
         </div>
 
         {/* Search Results Header */}
-        {searchQuery && (
+        {(searchQuery || selectedFilter !== 'all') && (
           <div className="container-fluid px-3">
             <div className="search-results-header">
               <h5>
-                {listings.length} result{listings.length !== 1 ? 's' : ''} for "{searchQuery}"
+                {listings.length} result{listings.length !== 1 ? 's' : ''} 
+                {searchQuery && ` for "${searchQuery}"`}
+                {selectedFilter !== 'all' && ` in ${selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1)}`}
               </h5>
-              <Link to="/listings" className="clear-search-btn">
-                <i className="fas fa-times"></i> Clear search
-              </Link>
+              <div className="d-flex gap-2">
+                {searchQuery && (
+                  <Link to="/listings" className="clear-search-btn">
+                    <i className="fas fa-times"></i> Clear search
+                  </Link>
+                )}
+                {selectedFilter !== 'all' && (
+                  <button 
+                    onClick={() => handleFilterChange('all')}
+                    className="clear-search-btn"
+                    style={{ border: 'none' }}
+                  >
+                    <i className="fas fa-times"></i> Clear filter
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -379,14 +488,35 @@ const ListingsIndex = () => {
             <div className="empty-state">
               <i className="fas fa-home fa-3x text-muted mb-3"></i>
               <h3 className="mb-3">
-                {searchQuery ? `No results found for "${searchQuery}"` : "No listings found"}
+                {searchQuery 
+                  ? `No results found for "${searchQuery}"` 
+                  : selectedFilter !== 'all' 
+                    ? `No ${selectedFilter} listings found`
+                    : "No listings found"
+                }
               </h3>
               <p className="text-muted">
                 {searchQuery 
                   ? "Try a different search term or check your spelling." 
-                  : "Check back later for new listings or try adjusting your filters."
+                  : selectedFilter !== 'all'
+                    ? `Try selecting a different category or clear the current filter.`
+                    : "Check back later for new listings or try adjusting your filters."
                 }
               </p>
+              {(searchQuery || selectedFilter !== 'all') && (
+                <button 
+                  onClick={() => {
+                    handleFilterChange('all');
+                    // Clear search if there's one
+                    if (searchQuery) {
+                      window.location.href = '/listings';
+                    }
+                  }}
+                  className="btn btn-primary mt-3"
+                >
+                  Show All Listings
+                </button>
+              )}
             </div>
           ) : (
             <div className="listings-grid">
