@@ -423,7 +423,7 @@ const Navbar = () => {
       </style>
 
       <nav className="modern-navbar">
-        <div className="container">
+        <div className="container-fluid px-3">
           <div className="d-flex align-items-center justify-content-between">
             {/* Brand */}
             <Link to="/" className="navbar-brand-modern">

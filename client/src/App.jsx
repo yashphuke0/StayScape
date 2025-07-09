@@ -37,7 +37,7 @@ function App() {
   return (
     <div className="App">
       <Navbar />
-      <div className="container">
+      <div className="w-100">
         <GlobalFlashMessage />
         <Routes>
           {/* Redirect root to listings */}

@@ -145,7 +145,7 @@ const ListingsIndex = () => {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
-            padding: 0 1rem;
+            padding: 0;
           }
 
           .listing-card {
@@ -307,7 +307,7 @@ const ListingsIndex = () => {
           @media (max-width: 576px) {
             .listings-grid {
               grid-template-columns: 1fr;
-              padding: 0 0.5rem;
+              padding: 0;
             }
           }
         `}
@@ -316,7 +316,7 @@ const ListingsIndex = () => {
       <div className="container-fluid px-0">
         {/* Filters Section */}
         <div className="filters-container">
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center px-3">
             <div className="filters-scroll flex-grow-1">
               <div className="filter-item">
                 <i className="fas fa-home"></i>
@@ -361,7 +361,7 @@ const ListingsIndex = () => {
 
         {/* Search Results Header */}
         {searchQuery && (
-          <div className="container">
+          <div className="container-fluid px-3">
             <div className="search-results-header">
               <h5>
                 {listings.length} result{listings.length !== 1 ? 's' : ''} for "{searchQuery}"
@@ -374,7 +374,7 @@ const ListingsIndex = () => {
         )}
 
         {/* Listings Grid */}
-        <div className="container">
+        <div className="container-fluid px-3">
           {listings.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-home fa-3x text-muted mb-3"></i>
