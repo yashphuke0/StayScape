@@ -7,7 +7,6 @@
 **A sleek, modern vacation rental platform built with the MERN stack**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-success?style=flat-square)](your-render-url-here)
-[![GitHub](https://img.shields.io/github/license/yourusername/stayscape?style=flat-square)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-v20.11.0-green?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-v18+-blue?style=flat-square&logo=react)](https://reactjs.org/)
 
